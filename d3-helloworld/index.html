@@ -1,0 +1,58 @@
+
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://d3js.org/d3.v5.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<style type="text/css">
+			h1{
+			text-align: center;
+			font-size: 3em;
+			}
+			#colorchanger{
+			display: block;
+			margin:auto;
+			font-size:24px;
+			border: solid 2px;
+			margin-bottom: 1em;
+			border-radius: 100px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>CIRCLES IN <span class="hex">BLACK</span>!</h1>
+		<input type="button" id="colorchanger" value="Change Colors">
+		<circles></circles>
+	</body>
+</html>
+<script>
+	$(document).ready(function() {
+	   for (p = 0; p < 100; p++) {
+	     makeCircle(p);
+	   }
+	 }); //end document.ready
+
+	function makeCircle(i){
+	var bodySelection = d3.select("circles");
+	var svgSelection = bodySelection.append("svg")
+	.attr("width", 2+(i*4))
+	.attr("height", 2+(i*4));
+
+	var circleSelection = svgSelection.append("circle")
+	.attr("cx", 1+(i*(2)))
+	.attr("cy", 1+(i*2))
+	.attr("r", 1+(i*2))
+	.style("fill", "black");
+	}
+
+	$("#colorchanger").click(function() {
+	var circleSelection = d3.selectAll("circle");
+	var randomColor = "";
+	randomColor = randomColor.concat("#",Math.floor(Math.random()*16777215).toString(16));
+	$("span.hex").css("color",randomColor);
+	$("span.hex").text(randomColor.toUpperCase());
+	circleSelection.style("fill",randomColor);
+	});
+
+</script>
