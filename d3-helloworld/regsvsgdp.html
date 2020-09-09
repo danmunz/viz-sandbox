@@ -21,27 +21,40 @@ path {
 </style>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <h1>Size of Code of Federal Regulations vs. GDP Growth, 1938-2019</h1>
 <script>
 
-var margin = {top: 30, right: 100, bottom: 30, left: 100},
-    width = 800 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+var margin = {top: 30, right: 100, bottom: 230, left: 60},
+    width = 1200 - margin.left - margin.right,
+    height = 670 - margin.top - margin.bottom;
 
 var parseDate = d3.time.format("%Y").parse;
 
+// Get the data
+var alldata = d3.csv("https://raw.githubusercontent.com/danmunz/viz-sandbox/master/d3-helloworld/regsvsgdp.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.date = parseDate(d.Year);
+        d.PagesDelta = +d.PagesDelta;
+        d.GDPGrowth = +d.GDPGrowth;
+        d.Event = +d.Events.toString();
+        console.log(d.date+" "+d.PagesDelta+" "+d.GDPGrowth+" "+d.Events);
+    });
+
 var x = d3.time.scale().range([0, width]);
-var y0 = d3.scale.linear().range([height, 0]);
-var y1 = d3.scale.linear().range([height, 0]);
+var y0 = d3.scale.linear()
+  .range([height, 0]);
+var y1 = d3.scale.linear()
+  .range([height, 0]);
 
 var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(5);
+    .orient("bottom").ticks(20);
 
 var yAxisLeft = d3.svg.axis().scale(y0)
-    .orient("left").ticks(5);
+    .orient("left").ticks(10);
 
 var yAxisRight = d3.svg.axis().scale(y1)
-    .orient("right").ticks(5);
+    .orient("right").ticks(10);
 
 var valueline = d3.svg.line()
     .x(function(d) { return x(d.date); })
@@ -59,21 +72,12 @@ var svg = d3.select("body")
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
-// Get the data
-d3.csv("regsvsgdp.csv", function(error, data) {
-    data.forEach(function(d) {
-        d.date = parseDate(d.Year);
-        d.PagesDelta = +d.PagesDelta;
-        d.GDPGrowth = +d.GDPGrowth;
-        console.log(d.date+" "+d.PagesDelta+" "+d.GDPGrowth);
-    });
-
     // Scale the range of the data
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y0.domain([0, d3.max(data, function(d) {
-		return Math.max(d.GDPGrowth); })]);
-    y1.domain([0, d3.max(data, function(d) {
-		return Math.max(d.PagesDelta); })]);
+y0.domain([d3.min(data, function(d) {return Math.max(d.GDPGrowth); }), d3.max(data, function(d) {return Math.max(d.GDPGrowth); })
+]);
+y1.domain([d3.min(data, function(d) {return Math.max(d.PagesDelta); }), d3.max(data, function(d) {return Math.max(d.PagesDelta); })
+]);
 
     svg.append("path")        // Add the valueline path.
         .attr("d", valueline(data));
@@ -88,12 +92,12 @@ d3.csv("regsvsgdp.csv", function(error, data) {
         .call(xAxis);
 
     svg.append("g")
-        .attr("class", "y axis")
+        .attr("class", "y axis left")
         .style("fill", "steelblue")
         .call(yAxisLeft);
 
     svg.append("g")
-        .attr("class", "y axis")
+        .attr("class", "y axis right")
         .attr("transform", "translate(" + width + " ,0)")
         .style("fill", "red")
         .call(yAxisRight);
@@ -116,14 +120,20 @@ svg.append("text")
     .style("text-anchor", "middle")
     .text("GDP Growth (%)");
 
-    // text label for the y axis
+    // text label for the y2 axis
 svg.append("text")
 .attr("transform", "rotate(-90)")
-.attr("y", 0 - margin.left)
+.attr("y", width)
 .attr("x",0 - (height / 2))
-.attr("dy", "1em")
+.attr("class","rightaxislabel")
 .style("text-anchor", "middle")
 .text("Change in # of CFR Pages");
+
+var yaxiswidth = $(".right").width();
+d3.select("rightaxislabel")
+.attr("dy", yaxiswidth);
+
+console.log(yaxiswidth);
 
 
 
